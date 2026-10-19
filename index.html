@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>John 15 Recitation Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500&display=swap">
+<style>
+/* One reading column: settings, a mic bar, then the passage itself as the page's body. Grape accent for the vine. */
+:root{
+  --bg:#F4F5F0;--surface:#FFFFFF;--ink:#1D221F;--muted:#5D655E;--faint:#9AA298;--line:#D6DBD0;
+  --grape:#5B3C7C;--grape-ink:#FFFFFF;--grape-soft:#EEE8F5;
+  --ok:#2E6B3A;--ok-soft:#E1EEDF;--bad:#B23A22;--bad-soft:#F9E4DE;--warn:#8A5B00;--warn-soft:#F8EDCF;
+  --serif:"Literata",Georgia,"Times New Roman",serif;
+  --sans:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131613;--surface:#1C201C;--ink:#E7EAE3;--muted:#A2A99F;--faint:#656C62;--line:#30362F;
+  --grape:#B89BDD;--grape-ink:#1A1224;--grape-soft:#2C2340;
+  --ok:#8CC891;--ok-soft:#1D3220;--bad:#F2907A;--bad-soft:#3E211A;--warn:#E5BA55;--warn-soft:#3A2E12;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131613;--surface:#1C201C;--ink:#E7EAE3;--muted:#A2A99F;--faint:#656C62;--line:#30362F;
+  --grape:#B89BDD;--grape-ink:#1A1224;--grape-soft:#2C2340;
+  --ok:#8CC891;--ok-soft:#1D3220;--bad:#F2907A;--bad-soft:#3E211A;--warn:#E5BA55;--warn-soft:#3A2E12;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:780px;margin:0 auto;padding:40px 20px 64px;display:flex;flex-direction:column;gap:22px}
+.eyebrow{margin:0 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+h1{margin:0;font-family:var(--serif);font-weight:500;font-size:clamp(30px,5vw,42px);letter-spacing:-.01em;line-height:1.15;text-wrap:balance}
+.controls{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.lab{font-size:13px;color:var(--muted);min-width:52px}
+select{font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
+.dash{color:var(--muted);font-size:14px}
+.chips,.seg{display:flex;gap:6px;flex-wrap:wrap}
+.chips{margin-left:6px}
+.btn,.chip,.seg button{font:inherit;font-size:14px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover,.chip:hover,.seg button:hover{border-color:var(--faint)}
+.chip.on,.seg button[aria-checked="true"]{background:var(--grape-soft);border-color:var(--grape);color:var(--grape)}
+.btn.primary{background:var(--grape);border-color:var(--grape);color:var(--grape-ink)}
+:focus-visible{outline:2px solid var(--grape);outline-offset:2px}
+.mic-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.mic{width:64px;height:64px;border-radius:50%;border:0;background:var(--grape);color:var(--grape-ink);display:grid;place-items:center;cursor:pointer;flex:none;position:relative}
+.mic.on::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--grape);animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{from{transform:scale(.92);opacity:.9}to{transform:scale(1.25);opacity:0}}
+@media (prefers-reduced-motion:reduce){.mic.on::after{animation:none;opacity:.6}}
+.mic-text{flex:1;min-width:180px}
+.status{margin:0;font-weight:500;font-size:17px}
+.sub{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.mic-actions{display:flex;gap:8px}
+.err{margin:0;padding:12px 14px;border-radius:10px;background:var(--bad-soft);color:var(--bad);font-size:14px}
+.passage{font-family:var(--serif);font-size:clamp(18px,2.6vw,21px);line-height:2.05;display:flex;flex-direction:column;gap:4px}
+.verse{margin:0;display:grid;grid-template-columns:36px minmax(0,1fr);align-items:baseline;scroll-margin:120px}
+.vn{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--muted);width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid var(--line);transform:translateY(-2px);font-variant-numeric:tabular-nums}
+.vn.active{border-color:var(--grape);color:var(--grape)}
+.vn.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.vn.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.w{border-radius:3px}
+.w.un{box-shadow:inset 0 -1.5px 0 var(--line)}
+.w.un .tr{color:transparent}
+.w.un .fl{color:var(--muted)}
+.w.un.show{color:var(--faint)}
+.w.un.hinted{color:var(--grape)}
+.w.next{box-shadow:inset 0 -3px 0 var(--grape)}
+.w.ok{color:var(--ink)}
+.w.close{color:var(--warn);background:var(--warn-soft);padding:0 2px}
+.w.wrong{color:var(--bad);background:var(--bad-soft);padding:0 2px}
+.w.missed{color:var(--bad);text-decoration:underline dotted var(--bad);text-underline-offset:5px}
+.said,.extra{font-family:var(--sans);font-size:.62em;color:var(--bad);text-decoration:line-through;vertical-align:.35em}
+.heard{display:flex;gap:12px;align-items:baseline;font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.heard p{margin:0;min-width:0;overflow-wrap:anywhere}
+.heard i{color:var(--faint)}
+.summary{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.summary h2{margin:0;font-family:var(--serif);font-weight:500;font-size:26px}
+.summary .meta{margin:0;color:var(--muted);font-size:14px}
+.summary ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.summary li{display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;font-size:15px;align-items:baseline}
+.summary li .v{font-size:13px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.tag{font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;margin-right:6px;white-space:nowrap}
+.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.tag.close{background:var(--warn-soft);color:var(--warn)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.credit{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+@media (max-width:520px){.wrap{padding-top:24px}.mic-actions{width:100%}.mic-actions .btn{flex:1}.chips{margin-left:0}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Recitation check · ESV</p>
+    <h1 id="ttl">John 15:1–12</h1>
+  </header>
+
+  <section class="controls" aria-label="Passage settings">
+    <div class="row">
+      <label class="lab" for="from">Verses</label>
+      <select id="from" aria-label="First verse"></select>
+      <span class="dash">to</span>
+      <select id="to" aria-label="Last verse"></select>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="row">
+      <span class="lab" id="modeLab">Text</span>
+      <div class="seg" role="radiogroup" aria-labelledby="modeLab">
+        <button type="button" role="radio" data-mode="hidden">Hidden</button>
+        <button type="button" role="radio" data-mode="letters">First letters</button>
+        <button type="button" role="radio" data-mode="full">Show all</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="mic-row">
+    <button id="mic" class="mic" type="button" aria-pressed="false" aria-label="Start listening"></button>
+    <div class="mic-text">
+      <p id="status" class="status">Tap the mic and start reciting</p>
+      <p id="substatus" class="sub">Begin at verse 1.</p>
+    </div>
+    <div class="mic-actions">
+      <button id="hint" class="btn" type="button">Hint</button>
+      <button id="reset" class="btn" type="button">Start over</button>
+    </div>
+  </section>
+
+  <p id="err" class="err" hidden></p>
+
+  <article id="passage" class="passage"></article>
+
+  <section class="heard" aria-label="What the microphone heard">
+    <span class="lab">Heard</span>
+    <p id="heard">Nothing yet.</p>
+  </section>
+
+  <section id="summary" class="summary" hidden aria-live="polite"></section>
+
+  <footer class="legend">
+    <span><i class="sw" style="background:var(--surface)"></i>Said right</span>
+    <span><i class="sw" style="background:var(--warn-soft);border-color:var(--warn)"></i>Close, could be the mic</span>
+    <span><i class="sw" style="background:var(--bad-soft);border-color:var(--bad)"></i>Wrong word or skipped</span>
+    <span><s class="extra" style="vertical-align:0;font-size:13px">word</s>Added, not in the text</span>
+  </footer>
+  <p class="credit">Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</p>
+</main>
+
+<script>
+(function(){
+const VERSES={
+  1:"I am the true vine, and my Father is the vinedresser.",
+  2:"Every branch in me that does not bear fruit he takes away, and every branch that does bear fruit he prunes, that it may bear more fruit.",
+  3:"Already you are clean because of the word that I have spoken to you.",
+  4:"Abide in me, and I in you. As the branch cannot bear fruit by itself, unless it abides in the vine, neither can you, unless you abide in me.",
+  5:"I am the vine; you are the branches. Whoever abides in me and I in him, he it is that bears much fruit, for apart from me you can do nothing.",
+  6:"If anyone does not abide in me he is thrown away like a branch and withers; and the branches are gathered, thrown into the fire, and burned.",
+  7:"If you abide in me, and my words abide in you, ask whatever you wish, and it will be done for you.",
+  8:"By this my Father is glorified, that you bear much fruit and so prove to be my disciples.",
+  9:"As the Father has loved me, so have I loved you. Abide in my love.",
+  10:"If you keep my commandments, you will abide in my love, just as I have kept my Father's commandments and abide in his love.",
+  11:"These things I have spoken to you, that my joy may be in you, and that your joy may be full.",
+  12:"This is my commandment, that you love one another as I have loved you."
+};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const norm=w=>w.toLowerCase().replace(/[’‘']/g,'').replace(/[^a-z0-9]/g,'');
+const NUM={'1':'one','2':'two','3':'three','4':'four','5':'five'};
+const EQ=[['to','too','two'],['i','eye','aye'],['him','hymn'],['bears','bares'],['bear','bare'],['vine','vein','vain'],['in','inn'],['be','bee'],['by','buy','bye'],['so','sew','sow'],['no','know'],['one','won'],['you','u'],['already','allready']];
+const CANON=new Map();EQ.forEach(g=>g.forEach(w=>CANON.set(w,g[0])));
+const CLOSE=new Set(['iam|im','youare|youre','heis|hes','itis|its','itwill|itll','ihave|ive','havei|ive']);
+const FILLER=new Set(['um','umm','uh','uhm','er','erm','ah','hmm','mm','mhm']);
+const COST=[0,0.4,1];
+const canon=w=>CANON.get(w)||w;
+
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=new Array(n+1),c=new Array(n+1);for(let j=0;j<=n;j++)p[j]=j;for(let i=1;i<=m;i++){c[0]=i;for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));const t=p;p=c;c=t;}return p[n];}
+const simCache=new Map();
+// 0 = same word, 1 = close (likely a mishearing or a tiny slip), 2 = different word
+function grade(e,s){
+  if(e===s||canon(e)===canon(s))return 0;
+  const k=e+'|'+s;let g=simCache.get(k);if(g!==undefined)return g;
+  if(CLOSE.has(k))g=1;
+  else{const d=lev(e,s),r=1-d/Math.max(e.length,s.length);g=(r>=0.7||(d===1&&Math.min(e.length,s.length)>=2&&(e.includes(s)||s.includes(e))))?1:2;}
+  simCache.set(k,g);return g;
+}
+
+let a=1,b=12,mode='hidden';
+try{const s=JSON.parse(localStorage.getItem('j15-recite')||'{}');if(s.a>=1&&s.a<=12)a=s.a;if(s.b>=a&&s.b<=12)b=s.b;if(['hidden','letters','full'].includes(s.mode))mode=s.mode;}catch(e){}
+function save(){try{localStorage.setItem('j15-recite',JSON.stringify({a,b,mode}));}catch(e){}}
+
+let E=[],catE=[],gradeRows=new Map();
+function buildE(){
+  E=[];for(let v=a;v<=b;v++)VERSES[v].split(' ').forEach(w=>E.push({v,raw:w,n:norm(w)}));
+  catE=E.map((e,i)=>i>0?E[i-1].n+e.n:'');gradeRows=new Map();
+}
+function row(s){let r=gradeRows.get(s);if(!r){r=new Uint8Array(E.length);for(let i=0;i<E.length;i++)r[i]=grade(E[i].n,s);gradeRows.set(s,r);}return r;}
+function tokenize(str){return str.replace(/[-–—]/g,' ').split(/\s+/).map(w=>{const n=norm(w);return{raw:w.replace(/[^A-Za-z0-9'’]/g,'').toLowerCase(),n:NUM[n]||n};}).filter(t=>t.n);}
+
+// Align what was heard against the text. The text's unspoken tail is free, so it tracks how far you've got.
+function align(S){
+  const n=E.length,m=S.length,W=m+1,D=new Float32Array((n+1)*W),B=new Uint8Array((n+1)*W);
+  const rows=S.map(row),catS=S.map((s,j)=>j>0?S[j-1]+s:'');
+  const xc=s=>FILLER.has(s)?0.05:1;
+  for(let j=1;j<=m;j++){D[j]=D[j-1]+xc(S[j-1]);B[j]=3;}
+  for(let i=1;i<=n;i++){
+    const r=i*W,p=r-W,e=E[i-1].n;D[r]=D[p]+1;B[r]=2;
+    for(let j=1;j<=m;j++){
+      let best=D[p+j-1]+COST[rows[j-1][i-1]],bb=1,c;
+      c=D[p+j]+1;if(c<best){best=c;bb=2;}
+      c=D[r+j-1]+xc(S[j-1]);if(c<best){best=c;bb=3;}
+      if(j>1){const cat=catS[j-1];if(Math.abs(cat.length-e.length)<=1&&cat[0]===e[0]&&grade(e,cat)===0){c=D[p+j-2]+0.15;if(c<best){best=c;bb=4;}}}
+      if(i>1){const cat=catE[i-1],s=S[j-1];if(Math.abs(cat.length-s.length)<=2&&cat[0]===s[0]){const g=grade(cat,s);if(g<2){c=D[p-W+j-1]+(g?0.55:0.15);if(c<best){best=c;bb=5;}}}}
+      D[r+j]=best;B[r+j]=bb;
+    }
+  }
+  let end=0,bv=Infinity;
+  for(let i=0;i<=n;i++){const v=D[i*W+m];if(v<=bv+1e-6){end=i;if(v<bv)bv=v;}}
+  const ops=[];let i=end,j=m;
+  while(i>0||j>0){
+    const bb=B[i*W+j];
+    if(bb===1){ops.push({t:'m',i:i-1,j:j-1,g:rows[j-1][i-1]});i--;j--;}
+    else if(bb===2){ops.push({t:'miss',i:i-1,j});i--;}
+    else if(bb===3){ops.push({t:'x',j:j-1});j--;}
+    else if(bb===4){ops.push({t:'m',i:i-1,j:j-2,g:0,two:true});i--;j-=2;}
+    else{ops.push({t:'m2',i:i-2,j:j-1,g:grade(catE[i-1],S[j-1])});i-=2;j--;}
+  }
+  ops.reverse();
+  return{ops,end};
+}
+
+// Speech recognition
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const ANDROID=/Android/i.test(navigator.userAgent);
+let rec=null,listening=false,stopping=false,skipCommit=false,stopTimer=0;
+let committed='',sFinal='',sInterim='';
+let hints=0,peek=-1,peekT=0,lastEnd=0,lastNext=0,lastM=0,lastScrollV=0;
+
+function spawn(){
+  const r=new SR();rec=r;
+  r.lang='en-US';r.continuous=!ANDROID;r.interimResults=true;r.maxAlternatives=1;
+  r.onresult=e=>{if(r!==rec)return;let f='',it='';for(let k=0;k<e.results.length;k++){const x=e.results[k];if(x.isFinal)f+=' '+x[0].transcript;else it+=' '+x[0].transcript;}sFinal=f;sInterim=it;schedule();};
+  r.onerror=e=>{
+    if(r!==rec)return;
+    const msg={'not-allowed':'The microphone is blocked for this page. Allow microphone access in the browser’s site settings (the icon at the left of the address bar), then tap the mic again.','service-not-allowed':'Speech recognition is turned off in this browser. In Safari, turn on Dictation in System Settings › Keyboard, or use Chrome.','network':'Speech recognition lost its internet connection. Check your connection, then tap the mic again.','audio-capture':'No microphone was found. Check your sound input in System Settings.'}[e.error];
+    if(msg){listening=false;showErr(msg);setUi();}
+  };
+  r.onend=()=>{
+    if(r!==rec)return;
+    if(skipCommit)skipCommit=false;
+    else committed+=' '+sFinal+(listening?'':' '+sInterim);
+    sFinal='';sInterim='';
+    if(listening){try{spawn();}catch(e){listening=false;rec=null;setUi();}}
+    else{rec=null;if(stopping)finish();else update();}
+  };
+  r.start();
+}
+function start(){
+  if(!SR){showErr('This browser can’t listen for speech. Open this page in Google Chrome or Safari.');return;}
+  hideErr();
+  if(lastM>0&&lastEnd>=E.length)clearSpeech();
+  listening=true;stopping=false;
+  try{spawn();}catch(e){listening=false;showErr('The microphone couldn’t start. Reload the page and try again.');}
+  setUi();update();
+}
+function stop(){
+  if(!listening)return;
+  listening=false;stopping=true;setUi();
+  try{rec&&rec.stop();}catch(e){}
+  clearTimeout(stopTimer);
+  stopTimer=setTimeout(()=>{if(!stopping)return;if(rec){committed+=' '+sFinal+' '+sInterim;sFinal='';sInterim='';const r=rec;rec=null;try{r.abort();}catch(e){}}finish();},1500);
+}
+function finish(){stopping=false;clearTimeout(stopTimer);setUi();update();}
+function halt(){listening=false;stopping=false;clearTimeout(stopTimer);if(rec){const r=rec;rec=null;try{r.abort();}catch(e){}}}
+function clearSpeech(){committed='';sFinal='';sInterim='';hints=0;peek=-1;lastScrollV=0;}
+function resetAll(){
+  clearSpeech();
+  if(listening&&rec){skipCommit=true;try{rec.abort();}catch(e){}}
+  update();setUi();
+}
+function showErr(t){const el=$('err');el.textContent=t;el.hidden=false;}
+function hideErr(){$('err').hidden=true;}
+
+let pend=0;
+function schedule(){if(!pend)pend=setTimeout(()=>{pend=0;update();},60);}
+
+function update(){
+  const settledView=!listening&&!stopping;
+  const fin=tokenize(committed+' '+sFinal),itk=settledView?[]:tokenize(sInterim);
+  const S=fin.concat(itk),fc=fin.length,m=S.length,n=E.length;
+  const res=align(S.map(t=>t.n));
+  const st=new Array(n).fill(null),ex=Array.from({length:n+1},()=>[]);
+  // The last couple of words heard are still being revised, so judge them only once they settle.
+  const settle=settledView?Infinity:Math.max(fc,m-2);
+  let pos=0;
+  for(const o of res.ops){
+    if(o.t==='x'){if(!FILLER.has(S[o.j].n)&&o.j<settle)ex[pos].push(S[o.j].raw);continue;}
+    if(o.t==='miss'){st[o.i]=o.j>=settle?{s:'pending'}:{s:'missed'};pos=o.i+1;continue;}
+    const said=o.two?S[o.j].raw+' '+S[o.j+1].raw:S[o.j].raw;
+    const s=['ok','close','wrong'][o.g];
+    const idx=o.t==='m2'?[o.i,o.i+1]:[o.i];
+    const unsettled=(o.two?o.j+1:o.j)>=settle;
+    idx.forEach(k=>{st[k]=(unsettled&&s!=='ok')?{s:'pending'}:{s,said};});
+    pos=idx[idx.length-1]+1;
+  }
+  let next=st.findIndex(x=>!x||x.s==='pending');if(next<0)next=n;
+  lastEnd=res.end;lastNext=next;lastM=m;
+  render(st,ex,next);
+  heard(fin,itk);
+  status();
+  if(settledView&&m>0)summarize(st,ex,res.end);else $('summary').hidden=true;
+  if(listening&&res.end===n&&fc===m&&m>0)stop();
+}
+
+function verseStatus(st,ex,next){
+  const out={};let k=0;
+  for(let v=a;v<=b;v++){
+    const s0=k;let done=true,bad=false,any=false;
+    while(k<E.length&&E[k].v===v){const s=st[k];if(!s||s.s==='pending')done=false;else{any=true;if(s.s==='wrong'||s.s==='missed')bad=true;}if(k>s0&&ex[k].length)bad=true;k++;}
+    if(ex[k]&&ex[k].length&&k>s0)bad=true;
+    out[v]=bad?'bad':(done&&any)?'ok':(any||(next<E.length&&E[next].v===v&&(listening||stopping)))?'active':'';
+  }
+  return out;
+}
+
+function word(k,s,next){
+  const w=E[k].raw;
+  if(!s||s.s==='pending'){
+    const cls='w un'+(k===next&&(listening||stopping)?' next':'');
+    if(peek===k)return `<span class="${cls} show hinted">${esc(w)}</span>`;
+    if(mode==='full')return `<span class="${cls} show">${esc(w)}</span>`;
+    if(mode==='letters'){const mm=w.match(/^([^A-Za-z]*[A-Za-z])(.*)$/)||['',w,''];return `<span class="${cls}"><span class="fl">${esc(mm[1])}</span><span class="tr">${esc(mm[2])}</span></span>`;}
+    return `<span class="${cls}"><span class="tr">${esc(w)}</span></span>`;
+  }
+  if(s.s==='ok')return `<span class="w ok">${esc(w)}</span>`;
+  if(s.s==='close')return `<span class="w close" title="Heard “${esc(s.said)}”">${esc(w)}</span>`;
+  if(s.s==='wrong')return `<s class="said" title="What you said">${esc(s.said)}</s> <span class="w wrong" title="You said “${esc(s.said)}”">${esc(w)}</span>`;
+  return `<span class="w missed" title="Skipped">${esc(w)}</span>`;
+}
+const extraHtml=x=>`<s class="extra" title="Added, not in the text">${esc(x)}</s>`;
+
+function render(st,ex,next){
+  const vs=verseStatus(st,ex,next),out=[];let k=0;
+  for(let v=a;v<=b;v++){
+    const parts=[],s0=k;
+    while(k<E.length&&E[k].v===v){if(k>s0||k===0)ex[k].forEach(x=>parts.push(extraHtml(x)));parts.push(word(k,st[k],next));k++;}
+    ex[k].forEach(x=>parts.push(extraHtml(x)));
+    out.push(`<p class="verse" id="v${v}"><span class="vn ${vs[v]}" aria-label="Verse ${v}">${v}</span><span>${parts.join(' ')}</span></p>`);
+  }
+  $('passage').innerHTML=out.join('');
+  if((listening||stopping)&&next<E.length){
+    const nv=E[next].v;
+    if(nv!==lastScrollV){lastScrollV=nv;const el=$('v'+nv);const r=el.getBoundingClientRect();if(r.top<0||r.bottom>innerHeight){el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}}
+  }
+}
+
+function heard(fin,itk){
+  if(!fin.length&&!itk.length){$('heard').textContent=listening?'Listening…':'Nothing yet.';return;}
+  const f=fin.slice(-40).map(t=>esc(t.raw)),pre=fin.length>40?'… ':'';
+  $('heard').innerHTML=pre+f.join(' ')+(itk.length?' <i>'+itk.map(t=>esc(t.raw)).join(' ')+'</i>':'');
+}
+
+const ref=()=>a===b?`John 15:${a}`:`John 15:${a}–${b}`;
+const clean=w=>w.replace(/[^A-Za-z’']/g,'');
+
+function summarize(st,ex,end){
+  const el=$('summary'),items=[];const badV=new Set();
+  let right=0,bad=0,close=0,lastKind='',lastIdx=-2;
+  for(let i=0;i<=E.length;i++){
+    if(ex[i].length){
+      const v=E[i>0?i-1:0].v;
+      ex[i].forEach(x=>{items.push({v,kind:'bad',tag:'Added',t:`“${x}”`});bad++;badV.add(v);});
+      lastKind='';
+    }
+    if(i>=E.length)break;
+    const s=st[i];if(!s||s.s==='pending')continue;
+    const v=E[i].v,w=clean(E[i].raw);
+    if(s.s==='ok'){right++;lastKind='';continue;}
+    if(s.s==='close'){right++;close++;items.push({v,kind:'close',tag:'Check',t:`heard “${s.said}” for “${w}”`});lastKind='';continue;}
+    const prev=items[items.length-1];
+    const kind=s.s==='wrong'?'wrong':'skip';
+    if(prev&&lastKind===kind&&lastIdx===i-1&&prev.v===v){
+      if(kind==='skip'){prev.words.push(w);prev.t=`“${prev.words.join(' ')}”`;}
+      else{prev.words.push(w);prev.said.push(s.said);prev.t=`said “${prev.said.join(' ')}” instead of “${prev.words.join(' ')}”`;}
+    }else{
+      bad++;badV.add(v);
+      if(kind==='skip')items.push({v,kind:'bad',tag:'Skipped',words:[w],t:`“${w}”`});
+      else items.push({v,kind:'bad',tag:'Wrong',words:[w],said:[s.said],t:`said “${s.said}” instead of “${w}”`});
+    }
+    lastKind=kind;lastIdx=i;
+  }
+  const all=end>=E.length,stopV=end<E.length?E[end].v:null;
+  let h,sub;
+  if(bad===0&&all){h='Word-perfect';sub=`Every word of ${ref()}, in order.`+(close?` ${close} ${close===1?'word was':'words were'} hard for the mic to hear, so check ${close===1?'it':'them'} below.`:'');}
+  else if(bad===0){h='No mistakes so far';sub=`You stopped in verse ${stopV}. Tap the mic to keep going.`;}
+  else{const vl=[...badV];h=`${bad} ${bad===1?'mistake':'mistakes'}`;sub=`In verse${vl.length>1?'s':''} ${vl.join(', ')}.`+(all?'':` You stopped in verse ${stopV}.`);}
+  const meta=`${right} of ${end} words right`+(hints?` · ${hints} ${hints===1?'hint':'hints'}`:'');
+  const vl=[...badV].sort((x,y)=>x-y);
+  const drill=vl.length?(vl[0]===vl[vl.length-1]?`Drill verse ${vl[0]}`:`Drill verses ${vl[0]}–${vl[vl.length-1]}`):'';
+  el.innerHTML=`<div><h2>${esc(h)}</h2><p class="meta">${esc(sub)}</p></div>
+    <p class="meta">${esc(meta)}</p>
+    ${items.length?`<ul>${items.map(it=>`<li><span class="v">v${it.v}</span><span><span class="tag ${it.kind}">${it.tag}</span>${esc(it.t)}</span></li>`).join('')}</ul>`:''}
+    <div class="actions"><button type="button" class="btn primary" id="again">Try again</button>${drill?`<button type="button" class="btn" id="drill">${drill}</button>`:''}</div>`;
+  el.hidden=false;
+  $('again').onclick=()=>{resetAll();start();};
+  if(drill)$('drill').onclick=()=>{setRange(vl[0],vl[vl.length-1]);};
+}
+
+const MIC='<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>';
+const STOP='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"/></svg>';
+function setUi(){
+  const m=$('mic');m.classList.toggle('on',listening);m.setAttribute('aria-pressed',String(listening));
+  m.setAttribute('aria-label',listening?'Stop listening':'Start listening');m.innerHTML=listening?STOP:MIC;
+  status();
+}
+function status(){
+  let s,sub;const nv=lastNext<E.length?E[lastNext].v:null;
+  if(!SR){s='Speech recognition isn’t available here';sub='Open this page in Google Chrome or Safari.';}
+  else if(stopping){s='Checking…';sub='';}
+  else if(listening){s=lastM&&nv?`Listening · verse ${nv}`:'Listening…';sub=lastM?'Tap the mic when you’re done. Pausing is fine.':`Start with verse ${a}.`;}
+  else if(lastM&&lastEnd<E.length){s=`Paused in verse ${nv}`;sub='Tap the mic to keep going, or start over.';}
+  else if(lastM){s='Finished';sub='Tap the mic to recite it again from the top.';}
+  else{s='Tap the mic and start reciting';sub=`Begin at verse ${a}. The space bar also starts and stops.`;}
+  $('status').textContent=s;$('substatus').textContent=sub;
+}
+
+const CHIPS=[[1,4],[5,7],[8,12],[1,12]];
+function syncControls(){
+  $('from').value=a;$('to').value=b;$('ttl').textContent=ref();
+  [...$('chips').children].forEach((c,i)=>c.classList.toggle('on',CHIPS[i][0]===a&&CHIPS[i][1]===b));
+  document.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-checked',String(x.dataset.mode===mode)));
+}
+function setRange(x,y){a=x;b=y;halt();clearSpeech();buildE();save();syncControls();setUi();update();}
+
+for(const id of ['from','to']){const s=$(id);for(let v=1;v<=12;v++){const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);}}
+$('from').onchange=()=>{const x=+$('from').value;setRange(x,Math.max(x,b));};
+$('to').onchange=()=>{const y=+$('to').value;setRange(Math.min(a,y),y);};
+CHIPS.forEach(([x,y])=>{const c=document.createElement('button');c.type='button';c.className='chip';c.textContent=(x===1&&y===12)?'All':`${x}–${y}`;c.onclick=()=>setRange(x,y);$('chips').appendChild(c);});
+document.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{mode=btn.dataset.mode;save();syncControls();update();});
+$('mic').onclick=()=>{listening?stop():start();};
+$('reset').onclick=()=>resetAll();
+$('hint').onclick=()=>{if(lastNext>=E.length)return;peek=lastNext;hints++;update();clearTimeout(peekT);peekT=setTimeout(()=>{peek=-1;update();},2500);};
+document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat)return;if(['BUTTON','SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();listening?stop():start();});
+
+buildE();syncControls();setUi();update();
+if(!SR)showErr('This browser can’t listen for speech. Open this page in Google Chrome or Safari.');
+})();
+</script>
+</body>
+</html>
