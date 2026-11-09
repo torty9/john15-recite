@@ -97,7 +97,7 @@ select{font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line)
 <main class="wrap">
   <header>
     <p class="eyebrow">Recitation check · ESV</p>
-    <h1 id="ttl">John 15:1–12</h1>
+    <h1 id="ttl">John 15:1–17</h1>
   </header>
 
   <section class="controls" aria-label="Passage settings">
@@ -164,7 +164,12 @@ const VERSES={
   9:"As the Father has loved me, so have I loved you. Abide in my love.",
   10:"If you keep my commandments, you will abide in my love, just as I have kept my Father's commandments and abide in his love.",
   11:"These things I have spoken to you, that my joy may be in you, and that your joy may be full.",
-  12:"This is my commandment, that you love one another as I have loved you."
+  12:"This is my commandment, that you love one another as I have loved you.",
+  13:"Greater love has no one than this, that someone lay down his life for his friends.",
+  14:"You are my friends if you do what I command you.",
+  15:"No longer do I call you servants, for the servant does not know what his master is doing; but I have called you friends, for all that I have heard from my Father I have made known to you.",
+  16:"You did not choose me, but I chose you and appointed you that you should go and bear fruit and that your fruit should abide, so that whatever you ask the Father in my name, he may give it to you.",
+  17:"These things I command you, so that you will love one another."
 };
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -188,9 +193,10 @@ function grade(e,s){
   simCache.set(k,g);return g;
 }
 
-let a=1,b=12,mode='hidden';
-try{const s=JSON.parse(localStorage.getItem('j15-recite')||'{}');if(s.a>=1&&s.a<=12)a=s.a;if(s.b>=a&&s.b<=12)b=s.b;if(['hidden','letters','full'].includes(s.mode))mode=s.mode;}catch(e){}
-function save(){try{localStorage.setItem('j15-recite',JSON.stringify({a,b,mode}));}catch(e){}}
+const LAST=17;
+let a=1,b=LAST,mode='hidden';
+try{const s=JSON.parse(localStorage.getItem('j15-recite-17')||'{}');if(s.a>=1&&s.a<=LAST)a=s.a;if(s.b>=a&&s.b<=LAST)b=s.b;if(['hidden','letters','full'].includes(s.mode))mode=s.mode;}catch(e){}
+function save(){try{localStorage.setItem('j15-recite-17',JSON.stringify({a,b,mode}));}catch(e){}}
 
 let E=[],catE=[],gradeRows=new Map();
 function buildE(){
@@ -427,7 +433,7 @@ function status(){
   $('status').textContent=s;$('substatus').textContent=sub;
 }
 
-const CHIPS=[[1,4],[5,7],[8,12],[1,12]];
+const CHIPS=[[1,4],[5,7],[8,12],[13,17],[1,LAST]];
 function syncControls(){
   $('from').value=a;$('to').value=b;$('ttl').textContent=ref();
   [...$('chips').children].forEach((c,i)=>c.classList.toggle('on',CHIPS[i][0]===a&&CHIPS[i][1]===b));
@@ -435,10 +441,10 @@ function syncControls(){
 }
 function setRange(x,y){a=x;b=y;halt();clearSpeech();buildE();save();syncControls();setUi();update();}
 
-for(const id of ['from','to']){const s=$(id);for(let v=1;v<=12;v++){const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);}}
+for(const id of ['from','to']){const s=$(id);for(let v=1;v<=LAST;v++){const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);}}
 $('from').onchange=()=>{const x=+$('from').value;setRange(x,Math.max(x,b));};
 $('to').onchange=()=>{const y=+$('to').value;setRange(Math.min(a,y),y);};
-CHIPS.forEach(([x,y])=>{const c=document.createElement('button');c.type='button';c.className='chip';c.textContent=(x===1&&y===12)?'All':`${x}–${y}`;c.onclick=()=>setRange(x,y);$('chips').appendChild(c);});
+CHIPS.forEach(([x,y])=>{const c=document.createElement('button');c.type='button';c.className='chip';c.textContent=(x===1&&y===LAST)?'All':`${x}–${y}`;c.onclick=()=>setRange(x,y);$('chips').appendChild(c);});
 document.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{mode=btn.dataset.mode;save();syncControls();update();});
 $('mic').onclick=()=>{listening?stop():start();};
 $('reset').onclick=()=>resetAll();
