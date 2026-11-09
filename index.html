@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>John 15 Recitation Check</title>
+<title>John 15 Memory Practice</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500&display=swap">
@@ -90,15 +90,53 @@ select{font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line)
 .legend span{display:inline-flex;gap:6px;align-items:center}
 .credit{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
-@media (max-width:520px){.wrap{padding-top:24px}.mic-actions{width:100%}.mic-actions .btn{flex:1}.chips{margin-left:0}}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.tabs button{font:inherit;font-size:15px;font-weight:500;padding:9px 6px;border:0;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--grape);color:var(--grape-ink)}
+.panel{display:flex;flex-direction:column;gap:22px}
+.panel[hidden]{display:none}
+.tip{margin:0;font-size:14px;color:var(--muted)}
+.fade-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.fade-row input{flex:1;min-width:160px;accent-color:var(--grape)}
+.fade-lv{font-size:14px;font-weight:500;min-width:140px}
+.w.un.tap{cursor:pointer}
+.w.pk .tr{color:var(--grape)}
+.flo{cursor:pointer}
+.flo.pk{color:var(--grape)}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--line)}
+.bar-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar input{flex:1 1 220px;min-width:0;font:inherit;font-size:17px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.bar input:focus,textarea:focus{border-color:var(--grape);outline:none;box-shadow:0 0 0 3px var(--grape-soft)}
+.score{margin:0;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+textarea{width:100%;min-height:200px;font-family:var(--serif);font-size:18px;line-height:1.7;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);resize:vertical}
+.err-sm{margin:0;font-size:14px;color:var(--bad)}
+.clock-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.clock-time{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.plan{display:flex;flex-direction:column;gap:6px;font-size:15px}
+.plan div{display:grid;grid-template-columns:48px minmax(0,1fr);gap:8px}
+.plan .t{font-variant-numeric:tabular-nums;color:var(--muted)}
+.plan .done{color:var(--faint)}
+.plan .done .t{color:var(--faint)}
+.plan .now{color:var(--grape);font-weight:600}
+.plan .now .t{color:var(--grape)}
+@media (max-width:520px){.wrap{padding-top:24px}.mic-actions{width:100%}.mic-actions .btn{flex:1}.chips{margin-left:0}.bar input{flex-basis:100%}.bar .btn{flex:1}}
+@media (max-width:440px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
 <main class="wrap">
   <header>
-    <p class="eyebrow">Recitation check · ESV</p>
+    <p class="eyebrow">Memory practice · ESV</p>
     <h1 id="ttl">John 15:1–17</h1>
   </header>
+
+  <nav class="tabs" role="tablist" aria-label="Practice mode">
+    <button type="button" role="tab" id="tab-recite" data-tab="recite" aria-controls="p-recite">Recite</button>
+    <button type="button" role="tab" id="tab-fade" data-tab="fade" aria-controls="p-fade">Fade</button>
+    <button type="button" role="tab" id="tab-test" data-tab="test" aria-controls="p-test">Letter test</button>
+    <button type="button" role="tab" id="tab-type" data-tab="type" aria-controls="p-type">Type it</button>
+  </nav>
 
   <section class="controls" aria-label="Passage settings">
     <div class="row">
@@ -108,15 +146,53 @@ select{font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line)
       <select id="to" aria-label="Last verse"></select>
       <div class="chips" id="chips"></div>
     </div>
-    <div class="row">
-      <span class="lab" id="modeLab">Text</span>
-      <div class="seg" role="radiogroup" aria-labelledby="modeLab">
-        <button type="button" role="radio" data-mode="hidden">Hidden</button>
-        <button type="button" role="radio" data-mode="letters">First letters</button>
-        <button type="button" role="radio" data-mode="full">Show all</button>
-      </div>
-    </div>
   </section>
+
+  <!-- Fade: hide more and more of the text -->
+  <section class="panel" id="p-fade" role="tabpanel" aria-labelledby="tab-fade" hidden>
+    <div class="fade-row">
+      <label class="lab" for="fadeLv">Hide</label>
+      <input type="range" id="fadeLv" min="0" max="4" step="1" value="0">
+      <span class="fade-lv" id="fadeLvT">Full text</span>
+    </div>
+    <p class="tip">Say it out loud, then slide right to hide more. Tap a blank to peek.</p>
+    <article class="passage" id="fadeText"></article>
+  </section>
+
+  <!-- Letter test: type the first letter of each word -->
+  <section class="panel" id="p-test" role="tabpanel" aria-labelledby="tab-test" hidden>
+    <div class="bar" id="tbar">
+      <div class="bar-row">
+        <input id="tin" type="text" placeholder="Type the first letter of each word" aria-label="First letter of the next word" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next">
+        <button id="tshow" class="btn" type="button">Show word</button>
+        <button id="tredo" class="btn" type="button">Restart</button>
+      </div>
+      <p class="score" id="tscore" aria-live="polite"></p>
+    </div>
+    <article class="passage" id="testText"></article>
+    <section id="tsum" class="summary" hidden aria-live="polite"></section>
+  </section>
+
+  <!-- Type it: write the whole passage from memory -->
+  <section class="panel" id="p-type" role="tabpanel" aria-labelledby="tab-type" hidden>
+    <p class="tip">Type the whole passage from memory, then check it. Capitals and punctuation don’t count.</p>
+    <textarea id="ta" aria-label="The passage, typed from memory" placeholder="Type it from memory…" autocapitalize="sentences" spellcheck="false"></textarea>
+    <p id="taErr" class="err-sm" hidden>Type the passage first.</p>
+    <div class="actions"><button id="tachk" class="btn primary" type="button">Check</button><button id="taclr" class="btn" type="button">Clear</button></div>
+    <section id="dsum" class="summary" hidden aria-live="polite"></section>
+    <article class="passage" id="diffText" hidden></article>
+  </section>
+
+  <!-- Recite: the microphone checker -->
+  <section class="panel" id="p-recite" role="tabpanel" aria-labelledby="tab-recite">
+  <div class="row">
+    <span class="lab" id="modeLab">Text</span>
+    <div class="seg" role="radiogroup" aria-labelledby="modeLab">
+      <button type="button" role="radio" data-mode="hidden">Hidden</button>
+      <button type="button" role="radio" data-mode="letters">First letters</button>
+      <button type="button" role="radio" data-mode="full">Show all</button>
+    </div>
+  </div>
 
   <section class="mic-row">
     <button id="mic" class="mic" type="button" aria-pressed="false" aria-label="Start listening"></button>
@@ -147,6 +223,18 @@ select{font:inherit;font-size:15px;padding:6px 10px;border:1px solid var(--line)
     <span><i class="sw" style="background:var(--bad-soft);border-color:var(--bad)"></i>Wrong word or skipped</span>
     <span><s class="extra" style="vertical-align:0;font-size:13px">word</s>Added, not in the text</span>
   </footer>
+  </section>
+
+  <section class="summary" aria-label="Two-hour study plan">
+    <h2>2-hour plan</h2>
+    <div class="clock-top">
+      <button id="clockBtn" class="btn" type="button">Start 2-hour clock</button>
+      <span id="clockEl" class="clock-time">0:00:00</span>
+      <span id="clockNext" class="sub"></span>
+    </div>
+    <div id="plan" class="plan"></div>
+  </section>
+
   <p class="credit">Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.</p>
 </main>
 
@@ -194,9 +282,10 @@ function grade(e,s){
 }
 
 const LAST=17;
-let a=1,b=LAST,mode='hidden';
-try{const s=JSON.parse(localStorage.getItem('j15-recite-17')||'{}');if(s.a>=1&&s.a<=LAST)a=s.a;if(s.b>=a&&s.b<=LAST)b=s.b;if(['hidden','letters','full'].includes(s.mode))mode=s.mode;}catch(e){}
-function save(){try{localStorage.setItem('j15-recite-17',JSON.stringify({a,b,mode}));}catch(e){}}
+const TABS=['recite','fade','test','type'];
+let a=1,b=LAST,mode='hidden',tab='recite';
+try{const s=JSON.parse(localStorage.getItem('j15-recite-17')||'{}');if(s.a>=1&&s.a<=LAST)a=s.a;if(s.b>=a&&s.b<=LAST)b=s.b;if(['hidden','letters','full'].includes(s.mode))mode=s.mode;if(TABS.includes(s.tab))tab=s.tab;}catch(e){}
+function save(){try{localStorage.setItem('j15-recite-17',JSON.stringify({a,b,mode,tab}));}catch(e){}}
 
 let E=[],catE=[],gradeRows=new Map();
 function buildE(){
@@ -439,7 +528,149 @@ function syncControls(){
   [...$('chips').children].forEach((c,i)=>c.classList.toggle('on',CHIPS[i][0]===a&&CHIPS[i][1]===b));
   document.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-checked',String(x.dataset.mode===mode)));
 }
-function setRange(x,y){a=x;b=y;halt();clearSpeech();buildE();save();syncControls();setUi();update();}
+function setRange(x,y){a=x;b=y;halt();clearSpeech();buildE();save();syncControls();setUi();update();renderFade();startTest();clearType();}
+
+// One line per verse, with the verse number badge, for the practice modes.
+function lines(px,parts,badge){
+  const out=[];
+  for(let v=a;v<=b;v++)out.push(`<p class="verse" id="${px}${v}"><span class="vn ${(badge&&badge[v])||''}" aria-label="Verse ${v}">${v}</span><span>${parts[v].join(' ')}</span></p>`);
+  return out.join('');
+}
+function partsFrom(cell){const p={};for(let v=a;v<=b;v++)p[v]=[];E.forEach((e,k)=>p[e.v].push(cell(k)));return p;}
+const rangeLabel=vl=>vl[0]===vl[vl.length-1]?`Drill verse ${vl[0]}`:`Drill verses ${vl[0]}–${vl[vl.length-1]}`;
+const smooth=()=>matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+
+// Fade
+const LV=['Full text','Some words hidden','Most words hidden','First letters only','Blank'];
+function renderFade(){
+  const L=+$('fadeLv').value;$('fadeLvT').textContent=LV[L];
+  $('fadeText').innerHTML=lines('f',partsFrom(k=>{
+    const w=E[k].raw;
+    if(!(L>=3||(L>0&&(k*37)%10<L*4)))return esc(w);
+    if(L===3)return `<span class="flo" data-k="${k}">${esc(w.replace(/^([^A-Za-z]*[A-Za-z])[A-Za-z’']*/,'$1'))}</span>`;
+    return `<span class="w un tap" data-k="${k}"><span class="tr">${esc(w)}</span></span>`;
+  }));
+}
+$('fadeLv').oninput=renderFade;
+$('fadeText').onclick=e=>{
+  const t=e.target.closest('[data-k]');if(!t||t.classList.contains('pk'))return;
+  const k=+t.dataset.k;t.classList.add('pk');
+  if(t.classList.contains('flo')){const o=t.textContent;t.textContent=E[k].raw;setTimeout(()=>{t.textContent=o;t.classList.remove('pk');},1800);}
+  else setTimeout(()=>t.classList.remove('pk'),1800);
+};
+
+// Letter test
+let tp=0,tr=[],consumed=0;
+const firstLetter=w=>((w.match(/[a-z]/i)||[''])[0]).toLowerCase();
+function startTest(){tp=0;tr=[];consumed=0;$('tin').value='';renderTest();}
+function renderTest(){
+  const n=E.length,miss=tr.filter(x=>!x).length,badge={};
+  let k=0;
+  for(let v=a;v<=b;v++){let bad=false,done=true;while(k<n&&E[k].v===v){if(k>=tp)done=false;else if(!tr[k])bad=true;k++;}badge[v]=bad?'bad':done?'ok':(tp<n&&E[tp].v===v)?'active':'';}
+  $('testText').innerHTML=lines('t',partsFrom(i=>{
+    const w=esc(E[i].raw);
+    if(i<tp)return tr[i]?`<span class="w ok">${w}</span>`:`<span class="w wrong">${w}</span>`;
+    return `<span class="w un${i===tp?' next':''}"><span class="tr">${w}</span></span>`;
+  }),badge);
+  const el=$('tsum');
+  if(tp<n){$('tscore').textContent=`${tp} of ${n} words · ${miss} ${miss===1?'miss':'misses'}`;el.hidden=true;return;}
+  const pct=Math.round(100*(n-miss)/n);
+  $('tscore').textContent=`Done · ${n-miss} of ${n} right (${pct}%)`;
+  const byV={};E.forEach((e,i)=>{if(!tr[i])(byV[e.v]=byV[e.v]||[]).push(clean(e.raw));});
+  const vl=Object.keys(byV).map(Number).sort((x,y)=>x-y);
+  el.innerHTML=`<div><h2>${miss?`${n-miss} of ${n} right`:'Word-perfect'}</h2><p class="meta">${miss?`${pct}%. Missed words are in red. Restart and go again.`:'Every first letter right. Move up to a bigger chunk, or try reciting it with the mic.'}</p></div>
+    ${vl.length?`<ul>${vl.map(v=>`<li><span class="v">v${v}</span><span>${esc(byV[v].join(', '))}</span></li>`).join('')}</ul>`:''}
+    <div class="actions"><button type="button" class="btn primary" id="tagain">Restart</button>${vl.length?`<button type="button" class="btn" id="tdrill">${rangeLabel(vl)}</button>`:''}</div>`;
+  el.hidden=false;
+  $('tagain').onclick=()=>{startTest();keepVisible();$('tin').focus();};
+  if(vl.length)$('tdrill').onclick=()=>{setRange(vl[0],vl[vl.length-1]);keepVisible();$('tin').focus();};
+}
+// Keep the word you're on visible below the sticky input bar.
+function keepVisible(){
+  const el=$('testText').querySelector('.next');if(!el)return;
+  const r=el.getBoundingClientRect(),top=$('tbar').getBoundingClientRect().bottom,vh=window.visualViewport?visualViewport.height:innerHeight;
+  if(r.top<top+8||r.bottom>vh-8)scrollTo({top:Math.max(0,scrollY+r.top-(top+vh)/2),behavior:smooth()});
+}
+function letter(c){
+  if(tp>=E.length)return;c=c.toLowerCase();if(!/[a-z]/.test(c))return;
+  tr[tp]=c===firstLetter(E[tp].raw);tp++;renderTest();
+  if(tp>=E.length)$('tsum').scrollIntoView({block:'nearest',behavior:smooth()});else keepVisible();
+}
+const tin=$('tin');
+// Read each new letter as it arrives. Phone keyboards that compose words get cleared once they finish.
+tin.addEventListener('input',e=>{
+  const v=tin.value;
+  if(v.length<consumed)consumed=v.length;
+  else{const add=v.slice(consumed);consumed=v.length;for(const c of add)letter(c);}
+  if(!e.isComposing){tin.value='';consumed=0;}
+});
+tin.addEventListener('compositionend',()=>{tin.value='';consumed=0;});
+$('tshow').onclick=()=>{if(tp<E.length){tr[tp]=false;tp++;renderTest();keepVisible();}tin.focus();};
+$('tredo').onclick=()=>{startTest();keepVisible();tin.focus();};
+$('testText').onclick=()=>tin.focus();
+
+// Type it
+const words=s=>s.replace(/[’‘']/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(Boolean);
+function clearType(){$('dsum').hidden=true;$('diffText').hidden=true;$('taErr').hidden=true;}
+function checkType(){
+  const raw=$('ta').value.trim();
+  if(!raw){$('taErr').hidden=false;$('ta').focus();return;}
+  $('taErr').hidden=true;
+  const tn=E.map(e=>e.n),u=words(raw),n=tn.length,m=u.length,W=m+1;
+  // Longest common subsequence: every typed word either matches the text in order or is extra.
+  const D=new Int32Array((n+1)*W);
+  for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)D[i*W+j]=tn[i]===u[j]?D[(i+1)*W+j+1]+1:Math.max(D[(i+1)*W+j],D[i*W+j+1]);
+  const parts={},bad={};for(let v=a;v<=b;v++)parts[v]=[];
+  let i=0,j=0,hit=0,extra=0;
+  while(i<n||j<m){
+    if(i<n&&j<m&&tn[i]===u[j]){parts[E[i].v].push(`<span class="w ok">${esc(E[i].raw)}</span>`);hit++;i++;j++;}
+    else if(j<m&&(i>=n||D[i*W+j+1]>=D[(i+1)*W+j])){const v=i<n?E[i].v:b;parts[v].push(extraHtml(u[j]));bad[v]=1;extra++;j++;}
+    else{parts[E[i].v].push(`<span class="w wrong">${esc(E[i].raw)}</span>`);bad[E[i].v]=1;i++;}
+  }
+  const badge={};for(let v=a;v<=b;v++)badge[v]=bad[v]?'bad':'ok';
+  const d=$('diffText');d.innerHTML=lines('d',parts,badge);d.hidden=false;
+  const vl=Object.keys(bad).map(Number).sort((x,y)=>x-y),pct=Math.round(100*hit/n),perfect=hit===n&&!extra;
+  const el=$('dsum');
+  el.innerHTML=`<div><h2>${perfect?'Word-perfect':`${hit} of ${n} words right`}</h2><p class="meta">${perfect?`Every word of ${ref()}, in order.`:`${pct}%${extra?`, plus ${extra} ${extra===1?'word':'words'} not in the text`:''}. Red words are missing or wrong; crossed-out words aren’t in the text.`}</p></div>
+    <div class="actions"><button type="button" class="btn primary" id="dagain">Clear and try again</button>${vl.length?`<button type="button" class="btn" id="ddrill">${rangeLabel(vl)}</button>`:''}</div>`;
+  el.hidden=false;
+  $('dagain').onclick=()=>{$('ta').value='';clearType();$('ta').focus();};
+  if(vl.length)$('ddrill').onclick=()=>{setRange(vl[0],vl[vl.length-1]);$('ta').value='';$('ta').focus();};
+  el.scrollIntoView({block:'start',behavior:smooth()});
+}
+$('tachk').onclick=checkType;
+$('taclr').onclick=()=>{$('ta').value='';clearType();$('ta').focus();};
+$('ta').oninput=()=>{$('taErr').hidden=true;};
+
+// Tabs
+function showTab(t,focus){
+  tab=t;save();
+  document.querySelectorAll('[role=tab]').forEach(x=>{const on=x.dataset.tab===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;});
+  TABS.forEach(k=>{$('p-'+k).hidden=k!==t;});
+  if(t!=='recite'&&listening)stop();
+  if(focus&&t==='test')tin.focus();
+}
+document.querySelectorAll('[role=tab]').forEach(x=>{
+  x.onclick=()=>showTab(x.dataset.tab,true);
+  x.onkeydown=e=>{const d=e.key==='ArrowRight'?1:e.key==='ArrowLeft'?-1:0;if(!d)return;e.preventDefault();const t=TABS[(TABS.indexOf(tab)+d+TABS.length)%TABS.length];showTab(t,false);$('tab-'+t).focus();};
+});
+
+// 2-hour clock
+const PLAN=[[0,'Read it through and get the flow of each verse'],[5,'Learn it verse by verse with Fade, adding one verse at a time'],[35,'Letter test on the whole passage, then drill the misses'],[45,'Break: walk away for 10 minutes'],[55,'Cold recall #1: Type it, no peeking first'],[75,'Cold recall #2: Letter test'],[95,'Cold recall #3: Recite out loud with the mic'],[115,'Final run: recite it to someone']];
+let clockStart=null;
+try{const s=+localStorage.getItem('j15-clock');if(s&&Date.now()-s<4*3600000)clockStart=s;}catch(e){}
+function fmt(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return `${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`;}
+function tick(){
+  const el=clockStart?Date.now()-clockStart:0,min=el/60000;
+  $('clockEl').textContent=fmt(el);
+  let cur=-1;if(clockStart)PLAN.forEach((p,k)=>{if(min>=p[0])cur=k;});
+  $('plan').innerHTML=PLAN.map((p,k)=>`<div class="${k<cur?'done':k===cur?'now':''}"><span class="t">${Math.floor(p[0]/60)}:${String(p[0]%60).padStart(2,'0')}</span><span>${k<cur?'✓ ':''}${esc(p[1])}</span></div>`).join('');
+  const nx=PLAN[cur+1];
+  $('clockNext').textContent=clockStart?(nx?`Next step in ${fmt(nx[0]*60000-el)}`:'Final stretch'):'';
+  $('clockBtn').textContent=clockStart?'Reset clock':'Start 2-hour clock';
+}
+$('clockBtn').onclick=()=>{clockStart=clockStart?null:Date.now();try{clockStart?localStorage.setItem('j15-clock',String(clockStart)):localStorage.removeItem('j15-clock');}catch(e){}tick();};
+setInterval(tick,1000);
 
 for(const id of ['from','to']){const s=$(id);for(let v=1;v<=LAST;v++){const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);}}
 $('from').onchange=()=>{const x=+$('from').value;setRange(x,Math.max(x,b));};
@@ -449,9 +680,9 @@ document.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{mode=btn.
 $('mic').onclick=()=>{listening?stop():start();};
 $('reset').onclick=()=>resetAll();
 $('hint').onclick=()=>{if(lastNext>=E.length)return;peek=lastNext;hints++;update();clearTimeout(peekT);peekT=setTimeout(()=>{peek=-1;update();},2500);};
-document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat)return;if(['BUTTON','SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();listening?stop():start();});
+document.addEventListener('keydown',e=>{if(tab!=='recite'||e.code!=='Space'||e.repeat)return;if(['BUTTON','SELECT','INPUT','TEXTAREA'].includes(e.target.tagName))return;e.preventDefault();listening?stop():start();});
 
-buildE();syncControls();setUi();update();
+buildE();syncControls();setUi();update();renderFade();startTest();showTab(tab,false);tick();
 if(!SR)showErr('This browser can’t listen for speech. Open this page in Google Chrome or Safari.');
 })();
 </script>
